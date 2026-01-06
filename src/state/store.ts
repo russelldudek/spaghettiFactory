@@ -24,7 +24,12 @@ const baseState: AppStateData = {
   lastModified: Date.now(),
 };
 
-const touch = (state: AppStateData): AppStateData => ({
+const touchData = <T extends AppStateData>(state: T): T => ({
+  ...state,
+  lastModified: Date.now(),
+});
+
+const touchStore = (state: StoreState): StoreState => ({
   ...state,
   lastModified: Date.now(),
 });
@@ -71,7 +76,7 @@ export const useStore = create<StoreState>()(
       addNode: (node) =>
         set((state) => {
           const newNode: Node = { ...node, id: createId("node") };
-          return touch({
+          return touchStore({
             ...state,
             nodes: [...state.nodes, newNode],
             selection: { type: "node", ids: [newNode.id] },
@@ -79,7 +84,7 @@ export const useStore = create<StoreState>()(
         }),
       updateNode: (id, updates) =>
         set((state) =>
-          touch({
+          touchStore({
             ...state,
             nodes: state.nodes.map((node) =>
               node.id === id ? { ...node, ...updates } : node
@@ -88,7 +93,7 @@ export const useStore = create<StoreState>()(
         ),
       removeNode: (id) =>
         set((state) =>
-          touch({
+          touchStore({
             ...state,
             nodes: state.nodes.filter((node) => node.id !== id),
             flows: state.flows.filter(
@@ -100,7 +105,7 @@ export const useStore = create<StoreState>()(
       addFlow: (flow) =>
         set((state) => {
           const newFlow: Flow = { ...flow, id: createId("flow") };
-          return touch({
+          return touchStore({
             ...state,
             flows: [...state.flows, newFlow],
             selection: { type: "flow", ids: [newFlow.id] },
@@ -108,7 +113,7 @@ export const useStore = create<StoreState>()(
         }),
       updateFlow: (id, updates) =>
         set((state) =>
-          touch({
+          touchStore({
             ...state,
             flows: state.flows.map((flow) =>
               flow.id === id ? { ...flow, ...updates } : flow
@@ -117,19 +122,19 @@ export const useStore = create<StoreState>()(
         ),
       removeFlow: (id) =>
         set((state) =>
-          touch({
+          touchStore({
             ...state,
             flows: state.flows.filter((flow) => flow.id !== id),
             selection: { type: null, ids: [] },
           })
         ),
-      setFloor: (floor) => set((state) => touch({ ...state, floor })),
-      setGrid: (grid) => set((state) => touch({ ...state, grid })),
+      setFloor: (floor) => set((state) => touchStore({ ...state, floor })),
+      setGrid: (grid) => set((state) => touchStore({ ...state, grid })),
       loadSample: () => set(() => ({ ...sampleState, selection: { type: null, ids: [] }, tool: "select", animate: false, sync: { endpoint: "", status: "idle" } })),
       resetAll: () => set(() => ({ ...baseState, selection: { type: null, ids: [] }, tool: "select", animate: false, sync: { endpoint: "", status: "idle" } })),
       importState: (stateData) =>
         set(() => ({
-          ...touch(stateData),
+          ...touchData(stateData),
           selection: { type: null, ids: [] },
           tool: "select",
           animate: false,
@@ -146,7 +151,7 @@ export const useStore = create<StoreState>()(
           y: node.y + 2,
         };
         set((state) =>
-          touch({
+          touchStore({
             ...state,
             nodes: [...state.nodes, duplicated],
             selection: { type: "node", ids: [duplicated.id] },
