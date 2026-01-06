@@ -58,7 +58,7 @@ export interface AppStateData {
 export type Selection =
   | { type: "node"; ids: string[] }
   | { type: "flow"; ids: string[] }
-  | { type: null; ids: [] };
+  | { type: null; ids: string[] };
 
 export type ToolMode =
   | "select"
