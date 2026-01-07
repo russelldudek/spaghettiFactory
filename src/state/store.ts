@@ -284,6 +284,9 @@ export const createNodeTemplate = (type: NodeType): Omit<Node, "id"> => {
   if (type === "door") {
     return { ...base, w: 4, h: 3, props: { doorKind: "bay", doorStyle: "single" } };
   }
+  if (type === "bench") {
+    return { ...base, w: 10, h: 4, props: { benchShape: "straight", benchDepth: 2 } };
+  }
   if (type === "person") {
     return { ...base, w: 3, h: 3 };
   }

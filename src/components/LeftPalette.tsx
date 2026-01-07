@@ -5,6 +5,8 @@ const paletteItems: { label: string; type: NodeType; props?: Record<string, unkn
   { label: "Workstation", type: "workstation" },
   { label: "Person", type: "person" },
   { label: "Shelf", type: "shelf" },
+  { label: "Bench", type: "bench", props: { benchShape: "straight" } },
+  { label: "L-Shaped Bench", type: "bench", props: { benchShape: "l" } },
   { label: "Dock", type: "dock" },
   { label: "Inbound Lane", type: "lane", props: { laneDirection: "inbound" } },
   { label: "Outbound Lane", type: "lane", props: { laneDirection: "outbound" } },
