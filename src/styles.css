@@ -39,6 +39,14 @@ button {
   cursor: pointer;
 }
 
+.top-bar select {
+  padding: 6px 10px;
+  border: 1px solid #ced6e0;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 14px;
+}
+
 button.active {
   background: #1e90ff;
   color: #ffffff;

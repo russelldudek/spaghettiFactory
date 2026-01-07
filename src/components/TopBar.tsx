@@ -1,10 +1,19 @@
-import { useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useStore } from "../state/store";
+import { AppStateData } from "../models/types";
 
 interface TopBarProps {
   onToggleStats: () => void;
   showStats: boolean;
 }
+
+type NamedSave = {
+  name: string;
+  savedAt: number;
+  state: AppStateData;
+};
+
+const NAMED_SAVE_KEY = "spaghetti-factory-named-saves";
 
 export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
   const tool = useStore((state) => state.tool);
@@ -18,6 +27,17 @@ export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
   const pullSync = useStore((state) => state.pullSync);
   const pushSync = useStore((state) => state.pushSync);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [namedSaves, setNamedSaves] = useState<NamedSave[]>(() => {
+    try {
+      const stored = localStorage.getItem(NAMED_SAVE_KEY);
+      if (!stored) return [];
+      const parsed = JSON.parse(stored) as NamedSave[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+  const [selectedSave, setSelectedSave] = useState("");
   const stateData = useStore((state) => ({
     nodes: state.nodes,
     flows: state.flows,
@@ -25,6 +45,10 @@ export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
     grid: state.grid,
     lastModified: state.lastModified,
   }));
+  const namedSaveOptions = useMemo(
+    () => namedSaves.map((save) => ({ value: save.name, label: save.name })),
+    [namedSaves]
+  );
 
   const handleExport = () => {
     const blob = new Blob([JSON.stringify(stateData, null, 2)], {
@@ -42,6 +66,41 @@ export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
     const text = await file.text();
     const data = JSON.parse(text);
     importState(data);
+  };
+
+  const persistNamedSaves = (next: NamedSave[]) => {
+    localStorage.setItem(NAMED_SAVE_KEY, JSON.stringify(next));
+    setNamedSaves(next);
+  };
+
+  const handleNamedSave = () => {
+    const name = window.prompt("Name this layout save:");
+    if (!name) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const entry: NamedSave = {
+      name: trimmed,
+      savedAt: Date.now(),
+      state: stateData,
+    };
+    const next = [entry, ...namedSaves.filter((save) => save.name !== trimmed)];
+    persistNamedSaves(next);
+    setSelectedSave(trimmed);
+  };
+
+  const handleLoadNamedSave = () => {
+    const entry = namedSaves.find((save) => save.name === selectedSave);
+    if (!entry) return;
+    importState(entry.state);
+  };
+
+  const handleReset = () => {
+    const confirmed = window.confirm(
+      "Reset the layout? This clears your current work and cannot be undone."
+    );
+    if (confirmed) {
+      resetAll();
+    }
   };
 
   return (
@@ -82,10 +141,26 @@ export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
         <button onClick={pushSync} disabled={!sync.endpoint || sync.status === "syncing"}>
           Sync Push
         </button>
+        <button onClick={handleNamedSave}>Save As</button>
+        <select
+          aria-label="Saved layouts"
+          value={selectedSave}
+          onChange={(event) => setSelectedSave(event.target.value)}
+        >
+          <option value="">Saved layouts</option>
+          {namedSaveOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <button onClick={handleLoadNamedSave} disabled={!selectedSave}>
+          Load
+        </button>
         <button onClick={() => fileInputRef.current?.click()}>Import</button>
         <button onClick={handleExport}>Export</button>
         <button onClick={loadSample}>Load sample</button>
-        <button onClick={resetAll}>Reset</button>
+        <button onClick={handleReset}>Reset</button>
         <button onClick={onToggleStats}>{showStats ? "Hide" : "Show"} Stats</button>
         <input
           ref={fileInputRef}
