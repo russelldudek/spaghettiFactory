@@ -166,11 +166,11 @@ const SettingsPanel = () => {
           />
         </label>
         <label className="field">
-          Floor Height (ft)
+          Floor Length (ft)
           <input
             type="number"
-            value={floor.height}
-            onChange={(event) => setFloor({ ...floor, height: Number(event.target.value) })}
+            value={floor.length}
+            onChange={(event) => setFloor({ ...floor, length: Number(event.target.value) })}
           />
         </label>
       </div>
