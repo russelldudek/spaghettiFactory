@@ -1,7 +1,7 @@
 import { AppStateData } from "./models/types";
 
 export const sampleState: AppStateData = {
-  floor: { width: 120, height: 80 },
+  floor: { width: 120, length: 80 },
   grid: { show: true, snap: true, size: 1 },
   lastModified: Date.now(),
   nodes: [

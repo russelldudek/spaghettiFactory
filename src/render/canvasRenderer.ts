@@ -14,7 +14,7 @@ export interface RenderOptions {
   ctx: CanvasRenderingContext2D;
   nodes: Node[];
   flows: Flow[];
-  floor: { width: number; height: number };
+  floor: { width: number; length: number };
   grid: { show: boolean; size: number };
   viewport: Viewport;
   selection: { nodeIds: string[]; flowIds: string[] };
@@ -24,7 +24,7 @@ export interface RenderOptions {
 
 const drawGrid = (
   ctx: CanvasRenderingContext2D,
-  floor: { width: number; height: number },
+  floor: { width: number; length: number },
   gridSize: number,
   viewport: Viewport
 ) => {
@@ -33,7 +33,7 @@ const drawGrid = (
   ctx.lineWidth = 1;
   const step = gridSize * BASE_PX_PER_FT * viewport.scale;
   const totalWidth = floor.width * BASE_PX_PER_FT * viewport.scale;
-  const totalHeight = floor.height * BASE_PX_PER_FT * viewport.scale;
+  const totalHeight = floor.length * BASE_PX_PER_FT * viewport.scale;
   const startX = viewport.offsetX;
   const startY = viewport.offsetY;
   for (let x = 0; x <= totalWidth; x += step) {
@@ -119,10 +119,10 @@ const drawFlow = (
   ctx.restore();
 };
 
-const drawFloorBounds = (ctx: CanvasRenderingContext2D, floor: { width: number; height: number }, viewport: Viewport) => {
+const drawFloorBounds = (ctx: CanvasRenderingContext2D, floor: { width: number; length: number }, viewport: Viewport) => {
   const topLeft = worldToScreen({ x: 0, y: 0 }, viewport);
   const width = floor.width * BASE_PX_PER_FT * viewport.scale;
-  const height = floor.height * BASE_PX_PER_FT * viewport.scale;
+  const height = floor.length * BASE_PX_PER_FT * viewport.scale;
   ctx.save();
   ctx.strokeStyle = "#555";
   ctx.lineWidth = 2;

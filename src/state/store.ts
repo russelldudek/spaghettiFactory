@@ -17,7 +17,7 @@ import { ManualEndpointAdapter } from "../sync/manualEndpointAdapter";
 const createId = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
 
 const baseState: AppStateData = {
-  floor: { width: 100, height: 60 },
+  floor: { width: 100, length: 60 },
   grid: { show: true, snap: true, size: 1 },
   nodes: [],
   flows: [],
@@ -32,6 +32,11 @@ const touchData = <T extends AppStateData>(state: T): T => ({
 const touchStore = (state: StoreState): StoreState => ({
   ...state,
   lastModified: Date.now(),
+});
+
+const normalizeFloor = (floor: Partial<AppStateData["floor"]> & { height?: number }) => ({
+  width: floor.width ?? baseState.floor.width,
+  length: floor.length ?? floor.height ?? baseState.floor.length,
 });
 
 export interface StoreState extends AppStateData {
@@ -128,13 +133,13 @@ export const useStore = create<StoreState>()(
             selection: { type: null, ids: [] },
           })
         ),
-      setFloor: (floor) => set((state) => touchStore({ ...state, floor })),
+      setFloor: (floor) => set((state) => touchStore({ ...state, floor: normalizeFloor(floor) })),
       setGrid: (grid) => set((state) => touchStore({ ...state, grid })),
       loadSample: () => set(() => ({ ...sampleState, selection: { type: null, ids: [] }, tool: "select", animate: false, sync: { endpoint: "", status: "idle" } })),
       resetAll: () => set(() => ({ ...baseState, selection: { type: null, ids: [] }, tool: "select", animate: false, sync: { endpoint: "", status: "idle" } })),
       importState: (stateData) =>
         set(() => ({
-          ...touchData(stateData),
+          ...touchData({ ...stateData, floor: normalizeFloor(stateData.floor) }),
           selection: { type: null, ids: [] },
           tool: "select",
           animate: false,
@@ -237,13 +242,17 @@ export const useStore = create<StoreState>()(
         lastModified: state.lastModified,
         sync: state.sync,
       }),
-      merge: (persisted, current) => ({
-        ...current,
-        ...(persisted as StoreState),
-        selection: { type: null, ids: [] },
-        tool: "select",
-        animate: false,
-      }),
+      merge: (persisted, current) => {
+        const persistedState = persisted as StoreState;
+        return {
+          ...current,
+          ...persistedState,
+          floor: normalizeFloor(persistedState.floor ?? {}),
+          selection: { type: null, ids: [] },
+          tool: "select",
+          animate: false,
+        };
+      },
     }
   )
 );

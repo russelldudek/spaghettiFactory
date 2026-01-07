@@ -38,7 +38,7 @@ export interface Flow {
 
 export interface FloorSettings {
   width: number;
-  height: number;
+  length: number;
 }
 
 export interface GridSettings {
