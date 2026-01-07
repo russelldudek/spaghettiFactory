@@ -36,6 +36,11 @@ const NodeEditor = ({ node }: { node: Node }) => {
     updateNode(node.id, { [key]: Number(event.target.value) } as Partial<Node>);
   };
 
+  const clampBenchDepth = (value: number) => {
+    const maxDepth = Math.max(0, Math.min(node.w, node.h));
+    return Math.min(Math.max(0, value), maxDepth);
+  };
+
   return (
     <div>
       <h3>Node Properties</h3>
@@ -125,6 +130,42 @@ const NodeEditor = ({ node }: { node: Node }) => {
               <option value="single">Single</option>
               <option value="double">Double</option>
             </select>
+          </label>
+        </div>
+      )}
+      {node.type === "bench" && (
+        <div className="grid-2">
+          <label className="field">
+            Bench Shape
+            <select
+              value={node.props.benchShape ?? "straight"}
+              onChange={(event) => {
+                const shape = event.target.value as "straight" | "l";
+                updateNode(node.id, {
+                  props: {
+                    ...node.props,
+                    benchShape: shape,
+                    benchDepth: shape === "l" ? clampBenchDepth(node.props.benchDepth ?? 2) : node.props.benchDepth,
+                  },
+                });
+              }}
+            >
+              <option value="straight">Straight</option>
+              <option value="l">L-shaped</option>
+            </select>
+          </label>
+          <label className="field">
+            Bench Depth (ft)
+            <input
+              type="number"
+              min={0}
+              value={node.props.benchDepth ?? 2}
+              onChange={(event) =>
+                updateNode(node.id, {
+                  props: { ...node.props, benchDepth: clampBenchDepth(Number(event.target.value)) },
+                })
+              }
+            />
           </label>
         </div>
       )}

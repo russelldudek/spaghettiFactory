@@ -8,6 +8,7 @@ const nodeColors: Record<string, string> = {
   dock: "#576574",
   lane: "#1dd1a1",
   door: "#f368e0",
+  bench: "#a55eea",
 };
 
 export interface RenderOptions {
@@ -64,8 +65,22 @@ const drawNode = (ctx: CanvasRenderingContext2D, node: Node, viewport: Viewport,
   ctx.fillStyle = nodeColors[node.type] ?? "#888";
   ctx.strokeStyle = selected ? "#ff4757" : "#222";
   ctx.lineWidth = selected ? 3 : 1.5;
-  ctx.fillRect(-width / 2, -height / 2, width, height);
-  ctx.strokeRect(-width / 2, -height / 2, width, height);
+
+  if (node.type === "bench" && node.props.benchShape === "l") {
+    const depthWorld = node.props.benchDepth ?? Math.min(w, h) / 3;
+    const depth = Math.min(Math.max(depthWorld * BASE_PX_PER_FT * viewport.scale, 0), width, height);
+    const left = -width / 2;
+    const top = -height / 2;
+    const bottom = height / 2;
+    ctx.beginPath();
+    ctx.rect(left, top, depth, height);
+    ctx.rect(left, bottom - depth, width, depth);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    ctx.fillRect(-width / 2, -height / 2, width, height);
+    ctx.strokeRect(-width / 2, -height / 2, width, height);
+  }
   ctx.fillStyle = "#fff";
   ctx.font = `${12 * viewport.scale}px sans-serif`;
   ctx.textAlign = "center";
