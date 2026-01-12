@@ -1,4 +1,4 @@
-export type NodeType = "workstation" | "person" | "shelf" | "dock" | "lane" | "door";
+export type NodeType = "workstation" | "person" | "shelf" | "dock" | "lane" | "door" | "bench";
 export type FlowType = "product" | "person";
 
 export interface Point {
@@ -13,6 +13,8 @@ export interface NodeProps {
   laneDirection?: "inbound" | "outbound";
   doorKind?: "bay" | "man";
   doorStyle?: "single" | "double";
+  benchShape?: "straight" | "l";
+  benchDepth?: number;
 }
 
 export interface Node {
