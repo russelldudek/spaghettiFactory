@@ -26,6 +26,8 @@ export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
   const sync = useStore((state) => state.sync);
   const pullSync = useStore((state) => state.pullSync);
   const pushSync = useStore((state) => state.pushSync);
+  const selection = useStore((state) => state.selection);
+  const duplicateNodes = useStore((state) => state.duplicateNodes);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [namedSaves, setNamedSaves] = useState<NamedSave[]>(() => {
     try {
@@ -103,6 +105,8 @@ export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
     }
   };
 
+  const canDuplicate = selection.type === "node" && selection.ids.length > 0;
+
   return (
     <div className="top-bar">
       <div className="tool-group">
@@ -161,6 +165,9 @@ export const TopBar = ({ onToggleStats, showStats }: TopBarProps) => {
         <button onClick={handleExport}>Export</button>
         <button onClick={loadSample}>Load sample</button>
         <button onClick={handleReset}>Reset</button>
+        <button onClick={() => duplicateNodes(selection.ids)} disabled={!canDuplicate}>
+          Duplicate
+        </button>
         <button onClick={onToggleStats}>{showStats ? "Hide" : "Show"} Stats</button>
         <input
           ref={fileInputRef}

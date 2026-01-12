@@ -60,6 +60,7 @@ export interface StoreState extends AppStateData {
   resetAll: () => void;
   importState: (state: AppStateData) => void;
   duplicateNode: (id: string) => string | null;
+  duplicateNodes: (ids: string[]) => string[];
   deleteSelection: () => void;
   setSyncEndpoint: (endpoint: string) => void;
   pullSync: () => Promise<void>;
@@ -146,23 +147,36 @@ export const useStore = create<StoreState>()(
           sync: { endpoint: get().sync.endpoint, status: "idle" },
         })),
       duplicateNode: (id) => {
-        const node = get().nodes.find((item) => item.id === id);
-        if (!node) return null;
-        const duplicated: Node = {
-          ...node,
-          id: createId("node"),
-          name: `${node.name} Copy`,
-          x: node.x + 2,
-          y: node.y + 2,
-        };
+        const [duplicatedId] = get().duplicateNodes([id]);
+        return duplicatedId ?? null;
+      },
+      duplicateNodes: (ids) => {
+        const { nodes } = get();
+        const newNodes: Node[] = [];
+        const newIds: string[] = [];
+        ids.forEach((id, index) => {
+          const node = nodes.find((item) => item.id === id);
+          if (!node) return;
+          const suffix = ids.length > 1 ? ` Copy ${index + 1}` : " Copy";
+          const duplicated: Node = {
+            ...node,
+            id: createId("node"),
+            name: `${node.name}${suffix}`,
+            x: node.x + 2,
+            y: node.y + 2,
+          };
+          newNodes.push(duplicated);
+          newIds.push(duplicated.id);
+        });
+        if (!newNodes.length) return [];
         set((state) =>
           touchStore({
             ...state,
-            nodes: [...state.nodes, duplicated],
-            selection: { type: "node", ids: [duplicated.id] },
+            nodes: [...state.nodes, ...newNodes],
+            selection: { type: "node", ids: newIds },
           })
         );
-        return duplicated.id;
+        return newIds;
       },
       deleteSelection: () => {
         const selection = get().selection;
