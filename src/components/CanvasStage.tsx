@@ -86,6 +86,7 @@ export const CanvasStage = () => {
   const addFlow = useStore((state) => state.addFlow);
   const deleteSelection = useStore((state) => state.deleteSelection);
   const duplicateNode = useStore((state) => state.duplicateNode);
+  const duplicateNodes = useStore((state) => state.duplicateNodes);
 
   const selectionIds = useMemo(
     () => ({
@@ -103,6 +104,12 @@ export const CanvasStage = () => {
       if (event.key === "Delete" || event.key === "Backspace") {
         deleteSelection();
       }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        if (selection.type === "node") {
+          duplicateNodes(selection.ids);
+        }
+      }
     };
     const handleKeyUp = (event: KeyboardEvent) => {
       if (event.key === " ") {
@@ -115,7 +122,7 @@ export const CanvasStage = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [deleteSelection]);
+  }, [deleteSelection, duplicateNodes, selection]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
